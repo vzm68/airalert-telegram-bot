@@ -15,6 +15,7 @@ class DbConfig:
 class TgBot:
     token: str
     admin_ids: list[int]
+    chats: list[int]
     use_redis: bool
     api_alert: str
 
@@ -38,6 +39,7 @@ def load_config(path: str = None):
         tg_bot=TgBot(
             token=env.str("BOT_TOKEN"),
             admin_ids=list(map(int, env.list("ADMINS"))),
+            chats=list(map(int, env.list("CHATS"))),
             use_redis=env.bool("USE_REDIS"),
             api_alert=env.str("API_ALERT")
         ),
