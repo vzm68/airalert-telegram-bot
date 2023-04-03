@@ -1,7 +1,6 @@
 from aiogram import Dispatcher, Bot
 from aiogram.types import Message
 from tgbot.config import load_config
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 import requests
 
@@ -30,6 +29,11 @@ async def get_map(message: Message):
 
 
 async def get_history(message: Message):
+    """
+    Temporary don't use. This for future
+    :param message:
+    :return:
+    """
     history = requests.get(history_link, headers=head).text
     await message.reply(text=history)
 
