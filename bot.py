@@ -8,7 +8,7 @@ from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from tgbot.config import load_config
 from tgbot.filters.admin import AdminFilter
 
-from tgbot.handlers.admin import register_admin
+from tgbot.handlers.admin import register_admin, bot_notification
 from tgbot.handlers.user import register_user
 from tgbot.handlers.alert import register_alert
 
@@ -64,6 +64,7 @@ async def main():
     set_scheduled_jobs(scheduler, bot)
     # start
     try:
+        await bot_notification(bot)
         scheduler.start()
         await dp.start_polling()
     finally:
