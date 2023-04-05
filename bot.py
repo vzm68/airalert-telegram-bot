@@ -40,7 +40,7 @@ def register_all_handlers(dp):
 
 def set_scheduled_jobs(scheduler, bot):
     scheduler.add_job(alert_check, "interval", seconds=30, args=(bot, ))
-    scheduler.add_job(daily_news, "cron", hour=6, minute=0, second=0, args=(bot,))
+    scheduler.add_job(daily_news, "cron", hour=8, minute=0, second=0, args=(bot,))
 
 
 async def main():
