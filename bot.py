@@ -18,7 +18,7 @@ from tgbot.middlewares.scheduler import SchedulerMiddleware
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from tgbot.handlers.alert import alert_check
-from tgbot.handlers.daily import daily_news
+from tgbot.handlers.daily import daily_weather, daily_statistic
 
 logger = logging.getLogger(__name__)
 
@@ -40,7 +40,8 @@ def register_all_handlers(dp):
 
 def set_scheduled_jobs(scheduler, bot):
     scheduler.add_job(alert_check, "interval", seconds=30, args=(bot, ))
-    scheduler.add_job(daily_news, "cron", hour=8, minute=0, second=0, args=(bot,))
+    scheduler.add_job(daily_weather, "cron", hour=8, minute=0, second=0, args=(bot,))
+    scheduler.add_job(daily_statistic, "cron", hour=10, minute=0, second=0, args=(bot,))
 
 
 async def main():
