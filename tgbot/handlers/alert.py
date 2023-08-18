@@ -8,6 +8,7 @@ import requests
 
 api_alert = load_config(".env").tg_bot.api_alert  # Get API alert from .env
 chats_id = load_config(".env").tg_bot.chats
+admins = load_config(".env").tg_bot.admin_ids
 
 link_state = "https://alerts.com.ua/api/states/25"  # I choose a specific region in my case
 history_link = "https://alerts.com.ua/api/history"  # History of alerts
@@ -39,21 +40,24 @@ time = ''
 
 
 async def alert_check(bot: Bot):
-    global flag  # Not a good idea to use global var, but it's solution in my case
+    global flag  # Not a good idea to use global var, but it's solution in my case. Func must be changed to class (!)
     global time
-
-    status = requests.get(link_state, headers=head).json()['state']['alert']  # Get True/False
-    if status is True and flag is False:
-        time = datetime.now().strftime('%Y-%m-%d %H:%M')  # Save fixed time data to our global var
-        flag = True
-        for chat in chats_id:
-            await bot.send_message(chat_id=chat,
-                                   text='🚨 Увага!\n\n'
-                                        'Повітряна тривога у м. Київ!')
-    elif flag is True and status is False:
-        flag = False
-        for chat in chats_id:
-            await bot.send_message(chat_id=chat, text=f'{stop_alert(time)}')
+    try:
+        status = requests.get(link_state, headers=head).json()['state']['alert']  # Get True/False
+        if status is True and flag is False:
+            time = datetime.now().strftime('%Y-%m-%d %H:%M')  # Save fixed time data to our global var
+            flag = True
+            for chat in chats_id:
+                await bot.send_message(chat_id=chat,
+                                       text='🚨 Увага!\n\n'
+                                            'Повітряна тривога у м. Київ!')
+        elif flag is True and status is False:
+            flag = False
+            for chat in chats_id:
+                await bot.send_message(chat_id=chat, text=f'{stop_alert(time)}')
+    except Exception as err:
+        for admin in admins:
+            await bot.send_message(chat_id=admin, text=f"Exception during execute alert_check func:\n\n{err}")
 
 
 async def get_map(message: Message):
