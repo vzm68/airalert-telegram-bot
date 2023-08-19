@@ -1,0 +1,27 @@
+name: Deploy to AWS instance
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Deploy to AWS instance
+      env:
+        PRIVATE_KEY: ${{ secrets.AWS_HOST }}
+        HOST: ${{ secrets.AWS_HOST }}
+        USER: ${{ secrets.AWS_USERNAME }}
+      run: |
+        echo "$PRIVATE_KEY" > private_key.pem
+        chmod 600 private_key.pem
+        ssh -o StrictHostKeyChecking=no -i private_key.pem $USER@$HOST '
+            cd /home/$USER/bots/airalert-telegram-bot &&
+            git pull &&
+            sudo systemctl restart airalert-telegram-bot.service
+        '
