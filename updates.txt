@@ -1,0 +1,4 @@
+Updates [test]
+- Airalert сhecking has been reduced to 15 seconds
+- Timezone fix
+- Other minor updates
