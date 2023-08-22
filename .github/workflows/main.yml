@@ -14,7 +14,7 @@ jobs:
 
     - name: Deploy to AWS instance
       env:
-        PRIVATE_KEY: ${{ secrets.AWS_PRIVATE_KEY }}
+        PRIVATE_KEY: ${{ secrets.AWS_SSH_PRIVATE_KEY }}
         HOST: ${{ secrets.AWS_HOST }}
         USER: ${{ secrets.AWS_USERNAME }}
       run: |
