@@ -17,15 +17,16 @@ async def bot_notification(bot: Bot):
 
 async def update_notify(bot: Bot):
     try:
-        with open("updates.txt", "r") as updates:
+        with open("updates.txt", "r") as fr:
+            updates = fr.read()
             if len(updates) > 7:
                 for chat in chats_id:
-                    await bot.send_message(chat_id=chat, text=updates.read())
+                    await bot.send_message(chat_id=chat, text=updates)
                 with open("updates.txt", "w") as clean:
                     pass
             else:
                 pass
-    except FileNotFoundError as err:
+    except Exception as err:
         for id in admin_ids:
             await bot.send_message(chat_id=id, text=err)
 
