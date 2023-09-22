@@ -41,7 +41,7 @@ def register_all_handlers(dp):
 def set_scheduled_jobs(scheduler, bot):
     scheduler.add_job(alert_check, "interval", seconds=15, args=(bot, ))
     scheduler.add_job(daily_weather, "cron", hour=8, minute=0, second=0, args=(bot,))
-    scheduler.add_job(daily_statistic, "cron", hour=10, minute=0, second=0, args=(bot,))
+    scheduler.add_job(daily_statistic, "cron", hour=9, minute=0, second=0, args=(bot,))
 
 
 async def main():

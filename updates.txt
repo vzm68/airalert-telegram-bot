@@ -1,4 +1,4 @@
-Updates [test]
-- Airalert сhecking has been reduced to 15 seconds
-- Timezone fix
+Оновлення за 22.09:
+- Зміна формату надсилання статистики бойових втрат
+- Час надсилання статистики тестово змінено на 9:00
 - Other minor updates
