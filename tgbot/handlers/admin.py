@@ -28,7 +28,7 @@ async def update_notify(bot: Bot):
                 pass
     except Exception as err:
         for id in admin_ids:
-            await bot.send_message(chat_id=id, text=err)
+            await bot.send_message(chat_id=id, text=f'{err}')
 
 
 def register_admin(dp: Dispatcher):

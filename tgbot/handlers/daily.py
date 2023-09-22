@@ -3,7 +3,6 @@ from tgbot.config import load_config
 
 import requests
 from bs4 import BeautifulSoup
-import re
 
 chats_id = load_config(".env").tg_bot.chats
 
@@ -36,36 +35,54 @@ def get_weather_data():
                f"Інформація не була отримана: <code>{err}</code>."
 
 
-def get_war_statistic():
-    url = "https://index.minfin.com.ua/ua/russian-invading/casualties/"
-    try:
-        response = requests.get(url).content
-        soup = BeautifulSoup(response, 'html.parser')
-        result = soup.find('div', {'class': 'casualties'})
-        text = result.text.strip()
-        pattern = r"[\d]+(?:\s?\(\D\d+\))?"
-        result = re.findall(pattern, text)
-        return f"📠 Орієнтовні втрати противника:\n" \
-               f"☠ <b>Особовий склад:</b> {result[12]} (<b>+{result[13]}</b>)\n" \
-               f"▪ Танки: {result[0]}\n" \
-               f"▪ ББМ: {result[1]}\n" \
-               f"▪ Гармати: {result[2]}\n" \
-               f"▪ РСЗВ: {result[3]}\n" \
-               f"▪ Засоби ППО: {result[4]}\n" \
-               f"🛩 Літаки: {result[5]}\n" \
-               f"🚁 Гелікоптери: {result[6]}\n" \
-               f"🛸 БПЛА: {result[7]}\n" \
-               f"🚀 Крилаті ракети: {result[8]}\n" \
-               f"🚤 Кораблі (катери): {result[9]}\n" \
-               f"🚛 Автомобілі та автоцистерни: {result[10]}\n" \
-               f"🚚 Спеціальна техніка: {result[11]}\n"
-    except Exception as err:
-        return f"Нажаль, сталася помилка...🦦\n\n" \
-               f"Інформація не була отримана: <code>{err}</code>."
-
-
 def get_daily_news():
     pass
+
+
+def get_latest_post_url():
+    """
+    Find in url list needed post by title.
+    """
+    base_urls = ['http://ukrpohliad.org/news', 'http://ukrpohliad.org/news/page/2']
+    for base_url in base_urls:
+        try:
+            response = requests.get(base_url)
+            response.raise_for_status()  # Raise HTTPError for bad responses
+            soup = BeautifulSoup(response.text, 'html.parser')
+
+            for article in soup.find_all('article'):
+                target = article.find('div', class_='thumb-area')
+                if target:
+                    title_tag = target.find('a')
+                    if title_tag and title_tag['title'].startswith('Загальні бойові втрати противника'):
+                        return title_tag['href']
+
+        except requests.RequestException as err:
+            return f'An error occurred while processing the request:\n\n<code>{err}</code>'
+        except Exception as err:
+            return f'Нажаль, сталася помилка при обробці запиту бойових втрат:\n\n<code>{err}</code>'
+
+    return "Статистика не була знайдена на етапі пошуку. Сценарій потребує доробки."
+
+
+def get_image_stat(today_post):
+    """Find and get feature jpg in selected post by link."""
+    try:
+        response = requests.get(today_post)
+        response.raise_for_status()  # Raise HTTPError for bad responses
+        soup = BeautifulSoup(response.text, 'html.parser')
+
+        meta_tags = soup.find_all('meta')
+        for tag in meta_tags:
+            if tag.get('property', '') == 'og:image':
+                return tag.get('content', '')
+
+        return "Статистика бойових втрат не була отримана на етапі обробки. Сценарій потребує доробки."
+
+    except requests.RequestException as err:
+        return f'Під час обробки запиту виникла помилка:\n\n<code>{err}</code>'
+    except Exception as err:
+        return f'An unexpected error occurred:\n\n<code>{err}</code>'
 
 
 async def daily_weather(bot: Bot):
@@ -74,5 +91,9 @@ async def daily_weather(bot: Bot):
 
 
 async def daily_statistic(bot: Bot):
+    img = get_image_stat(get_latest_post_url())
     for chat in chats_id:
-        await bot.send_message(chat_id=chat, text=get_war_statistic())
+        try:
+            await bot.send_photo(chat_id=chat, photo=img)
+        except Exception as err:
+            await bot.send_message(chat_id=chat, text=img)
