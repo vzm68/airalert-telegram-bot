@@ -39,50 +39,27 @@ def get_daily_news():
     pass
 
 
-def get_latest_post_url():
-    """
-    Find in url list needed post by title.
-    """
-    base_urls = ['http://ukrpohliad.org/news', 'http://ukrpohliad.org/news/page/2']
-    for base_url in base_urls:
-        try:
-            response = requests.get(base_url)
-            response.raise_for_status()  # Raise HTTPError for bad responses
-            soup = BeautifulSoup(response.text, 'html.parser')
+def get_image_stat():
+    # RSS feed to parse
+    rss_url = 'https://ukrpohliad.org/feed'
 
-            for article in soup.find_all('article'):
-                target = article.find('div', class_='thumb-area')
-                if target:
-                    title_tag = target.find('a')
-                    if title_tag and title_tag['title'].startswith('Загальні бойові втрати противника'):
-                        return title_tag['href']
+    # Make a request to the RSS feed
+    response = requests.get(rss_url)
 
-        except requests.RequestException as err:
-            return f'An error occurred while processing the request:\n\n<code>{err}</code>'
-        except Exception as err:
-            return f'Нажаль, сталася помилка при обробці запиту бойових втрат:\n\n<code>{err}</code>'
+    # Check if the request was successful
+    if response.status_code == 200:
+        # Parse the XML content of the RSS feed
+        soup = BeautifulSoup(response.text, 'xml')
+        items = soup.find_all('item')
+        for item in items:
+            if str(item.title.text).startswith('Загальні бойові втрати противника'):
+                content = item.find_next('content:encoded').text
+                content_soup = BeautifulSoup(content, 'html.parser')
+                img_link = content_soup.find('img')['src']
+                return img_link
 
-    return "Статистика не була знайдена на етапі пошуку. Сценарій потребує доробки."
-
-
-def get_image_stat(today_post):
-    """Find and get feature jpg in selected post by link."""
-    try:
-        response = requests.get(today_post)
-        response.raise_for_status()  # Raise HTTPError for bad responses
-        soup = BeautifulSoup(response.text, 'html.parser')
-
-        meta_tags = soup.find_all('meta')
-        for tag in meta_tags:
-            if tag.get('property', '') == 'og:image':
-                return tag.get('content', '')
-
-        return "Статистика бойових втрат не була отримана на етапі обробки. Сценарій потребує доробки."
-
-    except requests.RequestException as err:
-        return f'Під час обробки запиту виникла помилка:\n\n<code>{err}</code>'
-    except Exception as err:
-        return f'An unexpected error occurred:\n\n<code>{err}</code>'
+    else:
+        return f'Не вдалося отримати RSS-стрічку. Status code: {response.status_code}'
 
 
 async def daily_weather(bot: Bot):
