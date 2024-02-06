@@ -68,7 +68,7 @@ async def daily_weather(bot: Bot):
 
 
 async def daily_statistic(bot: Bot):
-    img = get_image_stat(get_latest_post_url())
+    img = get_image_stat()
     for chat in chats_id:
         try:
             await bot.send_photo(chat_id=chat, photo=img)
