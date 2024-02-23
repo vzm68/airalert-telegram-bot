@@ -49,7 +49,7 @@ def get_image_stat():
     # Check if the request was successful
     if response.status_code == 200:
         # Parse the XML content of the RSS feed
-        soup = BeautifulSoup(response.text, 'xml')
+        soup = BeautifulSoup(response.text, 'html.parser')
         items = soup.find_all('item')
         for item in items:
             if str(item.title.text).startswith('Загальні бойові втрати противника'):
