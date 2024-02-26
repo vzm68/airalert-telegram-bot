@@ -5,12 +5,16 @@ from tgbot.config import load_config
 
 import cv2
 from random import randint
-import feedparser
+import g4f
+
+rtsp_url = load_config(".env").tg_bot.rtsp_url
 
 
 async def user_start(message: Message):  # Temp command for test, i don't need it now
     await message.reply(f"Привіт, {message.from_user.first_name}!\n\n"
                         f"Я просто бот, нажаль, наразі я не виконую ніякої функції у цьому чаті.")
+
+conversation_history = {}  # According to ask_gpt and clear_answers functions
 
 
 def capture_rtsp_screenshot(rtsp_url, output_file="yard.png"):
@@ -31,9 +35,6 @@ def capture_rtsp_screenshot(rtsp_url, output_file="yard.png"):
     else:
         print("Error: Unable to capture a frame from the RTSP stream")
     cap.release()
-
-
-rtsp_url = load_config(".env").tg_bot.rtsp_url
 
 
 async def get_yard_img(message: Message):
@@ -60,9 +61,57 @@ async def news(message: Message):
     await message.answer(text=get_daily_news())
 
 
+def trim_history(history, max_length=4096):
+    current_length = sum(len(message["content"]) for message in history)
+    while history and current_length > max_length:
+        removed_message = history.pop(0)
+        current_length -= len(removed_message["content"])
+    return history
+
+
+async def clear_answers(message: Message):
+    user_id = message.from_user.id
+    conversation_history[user_id] = []
+    await message.reply("Історія пов'язаних діалогів з чат-ботом очищена.")
+
+
+async def ask_gpt(message: Message):
+    user_id = message.from_user.id
+    user_input = message.reply_to_message.text
+
+    await message.answer_chat_action(ChatActions.TYPING)
+
+    if user_id not in conversation_history:
+        conversation_history[user_id] = []
+
+    conversation_history[user_id].append({"role": "user", "content": user_input})
+    conversation_history[user_id] = trim_history(conversation_history[user_id])
+
+    chat_history = conversation_history[user_id]
+
+    try:
+        response = await g4f.ChatCompletion.create_async(
+            model=g4f.models.default,
+            messages=chat_history,
+            provider=g4f.Provider.Liaobots,
+        )
+        chat_gpt_response = response
+    except Exception as e:
+        print(f"{g4f.Provider.Liaobots.__name__}:", e)
+        chat_gpt_response = "Виникла помилка під час обробки запиту."
+
+    conversation_history[user_id].append({"role": "assistant", "content": chat_gpt_response})
+    length = sum(len(message["content"]) for message in conversation_history[user_id])
+    print(conversation_history, length)
+
+    await message.answer(chat_gpt_response)
+
+
 def register_user(dp: Dispatcher):
     dp.register_message_handler(user_start, commands=["start"], state="*")
     dp.register_message_handler(get_weather, commands=["weather"])
     dp.register_message_handler(get_yard_img, commands=["cam1"])
     dp.register_message_handler(cum_joke, commands=["cum"])
     dp.register_message_handler(news, commands=["news"])
+    dp.register_message_handler(ask_gpt, commands=["ask"])
+    dp.register_message_handler(clear_answers, commands=["clear"])
