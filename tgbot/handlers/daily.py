@@ -3,6 +3,7 @@ from tgbot.config import load_config
 
 import requests
 from bs4 import BeautifulSoup
+import feedparser
 
 chats_id = load_config(".env").tg_bot.chats
 
@@ -36,7 +37,22 @@ def get_weather_data():
 
 
 def get_daily_news():
-    pass
+    rss_url = "https://rss.unian.net/site/news_ukr.rss"
+
+    # Parse the RSS feed
+    feed = feedparser.parse(rss_url)
+
+    # Extract titles and links for the last 3 entries
+    latest_entries = feed.entries[:3]
+    titles_and_links = [(entry.title, entry.link) for entry in latest_entries]
+
+    result_string = ""
+
+    # Print the last 3 titles and links
+    for title, link in titles_and_links:
+        result_string += f'{title}\n<a href="{link}">Посилання</a>\n\n'
+
+    return result_string
 
 
 def get_image_stat():
@@ -74,3 +90,12 @@ async def daily_statistic(bot: Bot):
             await bot.send_photo(chat_id=chat, photo=img)
         except Exception as err:
             await bot.send_message(chat_id=chat, text=img)
+
+
+async def daily_news(bot: Bot):
+    news = get_daily_news()
+    for chat in chats_id:
+        try:
+            await bot.send_message(chat_id=chat, text=news)
+        except Exception as err:
+            await bot.send_message(chat_id=chat, text=f"<code>{err}</code>")
