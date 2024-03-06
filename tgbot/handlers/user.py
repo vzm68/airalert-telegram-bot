@@ -53,7 +53,7 @@ async def get_weather(message: Message):
 
 async def cum_joke(message: Message):
     num = randint(1, 250)
-    await message.reply(text=f"Видача <b>CUM</b> 💦💦💦 на лице <b>{message.from_user.first_name}</b>.\n\n"
+    await message.answer(text=f"Видача <b>CUM</b> 💦💦💦 на лице <b>{message.from_user.first_name}</b>.\n\n"
                              f"Кількість отриманих мл = <b>{num}</b>🚰")
 
 
@@ -72,14 +72,13 @@ def trim_history(history, max_length=4096):
 async def clear_answers(message: Message):
     user_id = message.from_user.id
     conversation_history[user_id] = []
-    await message.reply("Історія пов'язаних діалогів з чат-ботом очищена.")
+    await message.answer(f"Історія пов'язаних діалогів {message.from_user.first_name} з чат-ботом очищена.")
+    await message.delete()
 
 
 async def ask_gpt(message: Message):
     user_id = message.from_user.id
     user_input = message.reply_to_message.text
-
-    await message.answer_chat_action(ChatActions.TYPING)
 
     if user_id not in conversation_history:
         conversation_history[user_id] = []
@@ -90,21 +89,21 @@ async def ask_gpt(message: Message):
     chat_history = conversation_history[user_id]
 
     try:
+        await message.answer_chat_action(ChatActions.TYPING)
         response = await g4f.ChatCompletion.create_async(
-            model=g4f.models.default,
+            model=g4f.models.gpt_35_turbo,
             messages=chat_history,
-            provider=g4f.Provider.Liaobots,
+            provider=g4f.Provider.You,
         )
         chat_gpt_response = response
     except Exception as e:
-        print(f"{g4f.Provider.Liaobots.__name__}:", e)
-        chat_gpt_response = "Виникла помилка під час обробки запиту."
+        print(f"{g4f.Provider.You.__name__}:", e)
+        chat_gpt_response = f"Виникла помилка під час обробки запиту: \n\n" \
+                            f"<code>{e}</code>"
 
     conversation_history[user_id].append({"role": "assistant", "content": chat_gpt_response})
-    length = sum(len(message["content"]) for message in conversation_history[user_id])
-    print(conversation_history, length)
-
-    await message.answer(chat_gpt_response)
+    if message.reply_to_message.text:
+        await message.reply_to_message.reply(chat_gpt_response)
 
 
 def register_user(dp: Dispatcher):
