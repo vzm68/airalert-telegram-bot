@@ -93,11 +93,11 @@ async def ask_gpt(message: Message):
         response = await g4f.ChatCompletion.create_async(
             model=g4f.models.gpt_35_turbo,
             messages=chat_history,
-            provider=g4f.Provider.You,
+            provider=g4f.Provider.Liaobots,
         )
         chat_gpt_response = response
     except Exception as e:
-        print(f"{g4f.Provider.You.__name__}:", e)
+        print(f"{g4f.Provider.Liaobots.__name__}:", e)
         chat_gpt_response = f"Виникла помилка під час обробки запиту: \n\n" \
                             f"<code>{e}</code>"
 
