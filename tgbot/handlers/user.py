@@ -3,6 +3,7 @@ from aiogram.types import Message, InputFile, ChatActions
 from tgbot.handlers.daily import get_weather_data, get_daily_news
 from tgbot.config import load_config
 
+import time
 import cv2
 from random import randint
 import g4f
@@ -14,7 +15,10 @@ async def user_start(message: Message):  # Temp command for test, i don't need i
     await message.reply(f"Привіт, {message.from_user.first_name}!\n\n"
                         f"Я просто бот, нажаль, наразі я не виконую ніякої функції у цьому чаті.")
 
+
 conversation_history = {}  # According to ask_gpt and clear_answers functions
+
+users_info = {}  # collection of users with total liquid accumulated
 
 
 def capture_rtsp_screenshot(rtsp_url, output_file="yard.png"):
@@ -52,9 +56,31 @@ async def get_weather(message: Message):
 
 
 async def cum_joke(message: Message):
-    num = randint(1, 250)
-    await message.answer(text=f"Видача <b>CUM</b> 💦💦💦 на лице <b>{message.from_user.first_name}</b>.\n\n"
-                             f"Кількість отриманих мл = <b>{num}</b>🚰")
+    global users_info
+
+    user_name = message.from_user.first_name
+
+    ending_letters = ''
+
+    if user_name in users_info:
+        users_info[user_name]['num'] += randint(1, 250)
+        users_info[user_name]['last_call_time'] = time.time()
+        users_info[user_name]['call_count'] += 1
+    else:
+        users_info[user_name] = {
+            'num': randint(1, 250),
+            'last_call_time': time.time(),
+            'call_count': 1
+        }
+
+    if users_info[user_name]['call_count'] < 4:
+        ending_letters = 'ння'
+    else:
+        ending_letters = 'нь'
+
+    await message.answer(text=f"Видача <b>CUM</b> 💦💦💦 на лице <b>{user_name}</b>.\n\n"
+                              f"Кількість отриманих мл = <b>{users_info[user_name]['num']}</b>🚰 за "
+                              f"<b>{users_info[user_name]['call_count']}</b> закінче{ending_letters}✊")
 
 
 async def news(message: Message):
