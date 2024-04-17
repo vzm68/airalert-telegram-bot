@@ -73,6 +73,6 @@ def crypto():
               f'<b>ETH:</b>\n<code>{price_eth[0]}$</code>\n<code>{price_eth[1]}</code>\n\n'
               f'<b>LTC:</b>\n<code>{price_ltc[0]}$</code>\n<code>{price_ltc[1]}</code>\n\n'
               f'<b>XRP:</b>\n<code>{price_xrp[0]}$</code>\n<code>{price_xrp[1]}</code>\n\n'
-              f'<b>DOGE:</b>\n<code>{price_doge[0]}$</code>\n<code>{price_doge[1]}</code>'
-              f'<b>BNB:</b>\n<code>{price_bnb[0]}$</code>\n<code>{price_bnb[1]}</code>\n\n')
+              f'<b>DOGE:</b>\n<code>{price_doge[0]}$</code>\n<code>{price_doge[1]}</code>\n\n'
+              f'<b>BNB:</b>\n<code>{price_bnb[0]}$</code>\n<code>{price_bnb[1]}</code>')
     return result
