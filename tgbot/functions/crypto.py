@@ -15,7 +15,6 @@ def btc():
     # low = data['RAW']['BTC']['USD']['LOWDAY']
     pre = str(data['RAW']['BTC']['USD']['CHANGEPCT24HOUR'])[0:5] + '%'
     res = [data['RAW']['BTC']['USD']['PRICE'], emoji(pre)]
-    print(high, low)
     return res
 
 
