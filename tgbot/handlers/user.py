@@ -2,6 +2,7 @@ from aiogram import Dispatcher, Bot
 from aiogram.types import Message, InputFile, ChatActions
 from tgbot.handlers.daily import get_weather_data, get_daily_news
 from tgbot.config import load_config
+from tgbot.functions.crypto import crypto
 
 import time
 import cv2
@@ -132,6 +133,10 @@ async def ask_gpt(message: Message):
         await message.reply_to_message.reply(chat_gpt_response)
 
 
+async def get_crypto_price(message: Message):
+    await message.answer(text=crypto())
+
+
 def register_user(dp: Dispatcher):
     dp.register_message_handler(user_start, commands=["start"], state="*")
     dp.register_message_handler(get_weather, commands=["weather"])
@@ -140,3 +145,4 @@ def register_user(dp: Dispatcher):
     dp.register_message_handler(news, commands=["news"])
     dp.register_message_handler(ask_gpt, commands=["ask"])
     dp.register_message_handler(clear_answers, commands=["clear"])
+    dp.register_message_handler(get_crypto_price, commands=["price"])
