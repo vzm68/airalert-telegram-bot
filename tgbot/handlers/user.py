@@ -3,6 +3,7 @@ from aiogram.types import Message, InputFile, ChatActions
 from tgbot.handlers.daily import get_weather_data, get_daily_news
 from tgbot.config import load_config
 from tgbot.functions.crypto import crypto
+from tgbot.functions.tuya_devices import tuya_sensors_info
 
 import time
 import cv2
@@ -137,6 +138,10 @@ async def get_crypto_price(message: Message):
     await message.answer(text=crypto())
 
 
+async def get_tuya_sensors_info(message: Message):
+    await message.answer(text=tuya_sensors_info())
+
+
 def register_user(dp: Dispatcher):
     dp.register_message_handler(user_start, commands=["start"], state="*")
     dp.register_message_handler(get_weather, commands=["weather"])
@@ -146,3 +151,4 @@ def register_user(dp: Dispatcher):
     dp.register_message_handler(ask_gpt, commands=["ask"])
     dp.register_message_handler(clear_answers, commands=["clear"])
     dp.register_message_handler(get_crypto_price, commands=["price"])
+    dp.register_message_handler(get_tuya_sensors_info, commands=["sensors"])

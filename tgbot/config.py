@@ -23,7 +23,8 @@ class TgBot:
 
 @dataclass
 class Miscellaneous:
-    other_params: str = None
+    tuya_id: str
+    tuya_key: str
 
 
 @dataclass
@@ -43,7 +44,10 @@ def load_config(path: str = None):
             chats=list(map(int, env.list("CHATS"))),
             use_redis=env.bool("USE_REDIS"),
             api_alert=env.str("API_ALERT"),
-            rtsp_url=env.str("RTSP_URL")
+            rtsp_url=env.str("RTSP_URL"),
         ),
-        misc=Miscellaneous()
+        misc=Miscellaneous(
+            tuya_id=env.str("TUYA_ACCESS_ID"),
+            tuya_key=env.str("TUYA_ACCESS_KEY")
+        )
     )

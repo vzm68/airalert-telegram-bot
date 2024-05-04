@@ -1,6 +1,7 @@
 from aiogram import Bot
 from tgbot.config import load_config
 from tgbot.functions.crypto import crypto
+from tgbot.functions.tuya_devices import tuya_sensors_info
 
 import requests
 from bs4 import BeautifulSoup
@@ -103,7 +104,16 @@ async def daily_news(bot: Bot):
 
 
 async def daily_crypto(bot: Bot):
-    try:
-        await bot.send_message(chats_id=chat, text=crypto())
-    except Exception as err:
-        await bot.send_message(chat_id=chat, text=f"<code>{err}</code>")
+    for chat in chats_id:
+        try:
+            await bot.send_message(chat_id=chat, text=crypto())
+        except Exception as err:
+            await bot.send_message(chat_id=chat, text=f"<code>{err}</code>")
+
+
+async def daily_tuya(bot: Bot):
+    for chat in chats_id:
+        try:
+            await bot.send_message(chat_id=chat, text=tuya_sensors_info())
+        except Exception as err:
+            await bot.send_message(chat_id=chat, text=f"<code>{err}</code>")
