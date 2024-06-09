@@ -82,11 +82,11 @@ async def ping(bot: Bot):
         for name, change in changes.items():
             if change['duration'] is not None:
                 for chat in admins:
-                    await bot.send_message(chat_id=chat,
+                    await bot.send_message(chat_id=chats_id,
                                            text=f"🌐 <b>{name}</b> {change['status']} {change['duration']}")
             else:
                 for chat in admins:
-                    await bot.send_message(chat_id=chat,
+                    await bot.send_message(chat_id=chats_id,
                                            text=f"🌐 <b>{name}</b> {change['status']}")
     except Exception as err:
         for admin in admins:
