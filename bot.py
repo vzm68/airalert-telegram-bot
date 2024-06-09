@@ -40,7 +40,7 @@ def register_all_handlers(dp):
 
 def set_scheduled_jobs(scheduler, bot):
     scheduler.add_job(alert_check, "interval", seconds=15, args=(bot, ))
-    scheduler.add_job(ping, "interval", seconds=300, args=(bot, ))
+    scheduler.add_job(ping, "interval", minutes=5, args=(bot, ))
     scheduler.add_job(daily_news, "interval", hours=6, args=(bot, ))
     scheduler.add_job(daily_tuya, "cron", hour=7, minute=0, second=0, args=(bot,))
     scheduler.add_job(daily_weather, "cron", hour=8, minute=0, second=0, args=(bot,))
