@@ -77,11 +77,10 @@ async def get_history(message: Message):
 
 async def ping(bot: Bot):
     try:
-        changes = check_ips()
-        print(changes.items())
+        changes = await check_ips()
         for name, change in changes.items():
             if change['duration'] is not None:
-                for chat in admins:
+                for chat in chats_id:
                     await bot.send_message(chat_id=chat,
                                            text=f"🌐 <b>{name}</b> {change['status']} {change['duration']}")
             else:

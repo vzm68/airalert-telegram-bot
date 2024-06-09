@@ -1,3 +1,4 @@
+import asyncio
 import subprocess
 from datetime import datetime
 
@@ -10,19 +11,25 @@ device = {"39": devices[0], "68": devices[1]}
 status = {ip: {'reachable': None, 'last_change': None} for ip in device}
 
 
-def ping_ip(ip):
+async def ping_ip(ip):
     try:
-        output = subprocess.run(["ping", ip], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        output = await asyncio.create_subprocess_exec(
+            'ping', '-c', '4', ip,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE
+        )
+        stdout, stderr = await output.communicate()
         return output.returncode == 0
     except Exception as e:
         print(f"Error pinging {ip}: {e}")
         return False
 
 
-def check_ips():
+async def check_ips():
+    print('Here1')
     changes = {}
     for name, ip in device.items():
-        reachable = ping_ip(ip)
+        reachable = await ping_ip(ip)
         last_status = status[name]['reachable']
 
         if reachable != last_status:
