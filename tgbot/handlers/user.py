@@ -1,16 +1,13 @@
 from aiogram import Dispatcher, Bot
 from aiogram.types import Message, InputFile, ChatActions
 from tgbot.handlers.daily import get_weather_data, get_daily_news
-from tgbot.config import load_config
+from tgbot.functions.cctv import capture_rtsp_screenshot
 from tgbot.functions.crypto import crypto
 from tgbot.functions.tuya_devices import tuya_sensors_info
 
 import time
-import cv2
 from random import randint
 import g4f
-
-rtsp_url = load_config(".env").tg_bot.rtsp_url
 
 
 async def user_start(message: Message):  # Temp command for test, i don't need it now
@@ -23,29 +20,9 @@ conversation_history = {}  # According to ask_gpt and clear_answers functions
 users_info = {}  # collection of users with total liquid accumulated
 
 
-def capture_rtsp_screenshot(rtsp_url, output_file="yard.png"):
-    # Open RTSP stream
-    cap = cv2.VideoCapture(rtsp_url)
-
-    if not cap.isOpened():
-        print(f"Error: Unable to open RTSP stream")
-        return
-
-    # Read a frame from the stream
-    ret, frame = cap.read()
-
-    if ret:
-        # Save the frame as an image
-        cv2.imwrite(output_file, frame)
-        print(f"Screenshot saved to {output_file}")
-    else:
-        print("Error: Unable to capture a frame from the RTSP stream")
-    cap.release()
-
-
 async def get_yard_img(message: Message):
     try:
-        capture_rtsp_screenshot(rtsp_url)
+        capture_rtsp_screenshot()
         img = InputFile("yard.png")
         await message.answer_chat_action(action=ChatActions.UPLOAD_PHOTO)
         await message.reply_photo(photo=img)
