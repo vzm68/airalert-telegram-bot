@@ -3,6 +3,7 @@ from datetime import datetime
 from aiogram import Dispatcher, Bot
 from aiogram.types import Message
 from tgbot.config import load_config
+from tgbot.functions.pinger import check_ips
 
 import requests
 
@@ -72,6 +73,24 @@ async def get_history(message: Message):
     """
     history = requests.get(history_link, headers=head).text
     await message.reply(text=history)
+
+
+async def ping(bot: Bot):
+    try:
+        changes = check_ips()
+        print(changes.items())
+        for name, change in changes.items():
+            if change['duration'] is not None:
+                for chat in admins:
+                    await bot.send_message(chat_id=chat,
+                                           text=f"🌐 <b>{name}</b> {change['status']} {change['duration']}")
+            else:
+                for chat in admins:
+                    await bot.send_message(chat_id=chat,
+                                           text=f"🌐 <b>{name}</b> {change['status']}")
+    except Exception as err:
+        for admin in admins:
+            await bot.send_message(chat_id=admin, text=f"Exception during execute ping func:\n\n{err}")
 
 
 def register_alert(dp: Dispatcher):
