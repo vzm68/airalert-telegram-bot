@@ -25,6 +25,7 @@ class TgBot:
 class Miscellaneous:
     tuya_id: str
     tuya_key: str
+    ip: list
 
 
 @dataclass
@@ -36,7 +37,6 @@ class Config:
 def load_config(path: str = None):
     env = Env()
     env.read_env(path)
-
     return Config(
         tg_bot=TgBot(
             token=env.str("BOT_TOKEN"),
@@ -48,6 +48,7 @@ def load_config(path: str = None):
         ),
         misc=Miscellaneous(
             tuya_id=env.str("TUYA_ACCESS_ID"),
-            tuya_key=env.str("TUYA_ACCESS_KEY")
+            tuya_key=env.str("TUYA_ACCESS_KEY"),
+            ip=env.list("IP")
         )
     )

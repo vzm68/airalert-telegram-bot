@@ -80,7 +80,7 @@ def tuya_sensors_info():
         for location, data in device_data.items():
             for device_name, info in data.items():
                 output += f"{location}:\n"
-                output += "-" * len(location) + "\n"
+                output += "=" * len(location) + "\n"
                 output += f"{'Температура:':<15} {info['temp']}°C\n"
                 output += f"{'Вологість:':<15} {info['humidity']}%\n"
                 output += f"{'Акумулятор:':<15} {info['battery']}\n\n"
