@@ -20,8 +20,8 @@ async def get_price_and_change(crypto_symbol):
             async with session.get(url) as response:
                 response.raise_for_status()
                 data = await response.json()
-                price = data['RAW'][crypto_symbol]['USD']['PRICE']
-                change_pct = str(data['RAW'][crypto_symbol]['USD']['CHANGEPCT24HOUR'])[0:5] + '%'
+                price = data['DISPLAY'][crypto_symbol]['USD']['PRICE']
+                change_pct = str(data['DISPLAY'][crypto_symbol]['USD']['CHANGEPCT24HOUR'])[0:5] + '%'
                 return price, emoji(change_pct)
     except (aiohttp.ClientError, KeyError, ValueError) as err:
         logger.error(f"Error fetching data for {crypto_symbol}: {err}")
@@ -49,7 +49,7 @@ async def crypto() -> str:
     result = ""
     for symbol, price in zip(symbols, prices):
         if price[0] is not None:
-            result += f'<b>{symbol}:</b>\n<code>{price[0]}$</code>\n<code>{price[1]}</code>\n\n'
+            result += f'<b>{symbol}:</b>\n<code>{price[0]}</code>\n<code>{price[1]}</code>\n\n'
         else:
             result += f'<b>{symbol}:</b>\n<code>Error fetching data</code>\n\n'
 
@@ -67,5 +67,5 @@ async def index_price(index):
         if index_info is None:
             return f"🦉 Вибач, або був вказаний некоректний індекс, або я не можу отримати інформацію про <b>{index}</b>."
         else:
-            price = f"""<b>{index}:</b>\n<code>{index_info[0]}$</code>\n<code>{index_info[1]}</code>"""
+            price = f"""<b>{index}:</b>\n<code>{index_info[0]}</code>\n<code>{index_info[1]}</code>"""
             return price
