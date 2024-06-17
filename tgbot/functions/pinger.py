@@ -1,8 +1,11 @@
 import asyncio
+import logging
 import subprocess
 from datetime import datetime
 
 from tgbot.config import load_config
+
+logger = logging.getLogger(__name__)
 
 devices = load_config(".env").misc.ip
 
@@ -21,12 +24,11 @@ async def ping_ip(ip):
         stdout, stderr = await output.communicate()
         return output.returncode == 0
     except Exception as e:
-        print(f"Error pinging {ip}: {e}")
+        logger.error(f"Error pinging {ip}: {e}")
         return False
 
 
 async def check_ips():
-    print('Here1')
     changes = {}
     for name, ip in device.items():
         reachable = await ping_ip(ip)
