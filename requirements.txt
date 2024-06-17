@@ -8,3 +8,4 @@ opencv-python~=4.9.0.80
 feedparser~=6.0.11
 g4f~=0.3.0.8
 tinytuya~=1.13.2
+aiohttp~=3.8.6

@@ -1,6 +1,10 @@
 import tinytuya
 from tgbot.config import load_config
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 tuya_access_id = load_config(".env").misc.tuya_id
 tuya_access_key = load_config(".env").misc.tuya_key
 
@@ -12,6 +16,7 @@ c = tinytuya.Cloud(
 
 # No secret, just ids
 devices = {"68 Rest Room": "bfb1a7895a12867af0uusb",
+           "68 Living Room": "bf8cf3cb87010442f29ut7",
            "68 Balcony": "bfe1856bd08d9af9d38mau",
            "39 Indoor": "bf70f3538cf3798dab1hdr",
            "39 kitchen": "bf3332e7a109148993aykc"}
@@ -19,6 +24,7 @@ devices = {"68 Rest Room": "bfb1a7895a12867af0uusb",
 # Track and identify devices by location, can be changed at will
 device_locations = [
     ("68, Спальня", "68 Rest Room"),
+    ("68, Вітальня", "68 Living Room"),
     ("68, Балкон", "68 Balcony"),
     ("39, Коридор", "39 Indoor"),
     ("39, Кухня", "39 kitchen")
@@ -28,7 +34,6 @@ device_locations = [
 def tuya_sensors_info():
     """
     Prepares a beautiful view of information
-
     :param device_data:
     :return:
     """
@@ -36,7 +41,6 @@ def tuya_sensors_info():
     def data(device_name):
         """
         Parse needed data from every device.
-
         :param device_name:
         :return:
         """
@@ -67,7 +71,7 @@ def tuya_sensors_info():
 
         except Exception as err:
             # For beauty output in result, in future must be fixed
-            print(err)
+            logger.error(f"Got exception during get status: {err}")
             return {'temp': "Failed ", 'humidity': "Failed ", 'battery': "Failed "}
 
     device_data = {}  # Final sorting for display in the format {Device_name: "temp": data, ..etc}
@@ -76,6 +80,7 @@ def tuya_sensors_info():
         device_data[location] = {device_name: data(device_name)}
 
     output = ""
+
     try:
         for location, data in device_data.items():
             for device_name, info in data.items():
@@ -85,7 +90,9 @@ def tuya_sensors_info():
                 output += f"{'Вологість:':<15} {info['humidity']}%\n"
                 output += f"{'Акумулятор:':<15} {info['battery']}\n\n"
     except Exception as err:
-        print(err)
+        logger.warning(f"During inspect device_data {err}")
+
+    logger.info(f"Tuya sensors info was prepare to send.")
     return output
 
 

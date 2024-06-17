@@ -1,4 +1,9 @@
-import requests
+import aiohttp
+import asyncio
+
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def emoji(pre):
@@ -8,71 +13,59 @@ def emoji(pre):
         return f'{pre} 🟢'
 
 
-def btc():
-    url = requests.get(f'https://min-api.cryptocompare.com/data/pricemultifull?fsyms=BTC&tsyms=USD')
-    data = url.json()
-    # high = data['RAW']['BTC']['USD']['HIGHDAY']
-    # low = data['RAW']['BTC']['USD']['LOWDAY']
-    pre = str(data['RAW']['BTC']['USD']['CHANGEPCT24HOUR'])[0:5] + '%'
-    res = [data['RAW']['BTC']['USD']['PRICE'], emoji(pre)]
-    return res
+async def get_price_and_change(crypto_symbol):
+    url = f'https://min-api.cryptocompare.com/data/pricemultifull?fsyms={crypto_symbol}&tsyms=USD'
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url) as response:
+                response.raise_for_status()
+                data = await response.json()
+                price = data['RAW'][crypto_symbol]['USD']['PRICE']
+                change_pct = str(data['RAW'][crypto_symbol]['USD']['CHANGEPCT24HOUR'])[0:5] + '%'
+                return price, emoji(change_pct)
+    except (aiohttp.ClientError, KeyError, ValueError) as err:
+        logger.error(f"Error fetching data for {crypto_symbol}: {err}")
+        return None
 
 
-def eth():
-    url = requests.get(f'https://min-api.cryptocompare.com/data/pricemultifull?fsyms=ETH&tsyms=USD')
-    data = url.json()
-    # high = data['RAW']['ETH']['USD']['HIGHDAY']
-    # low = data['RAW']['ETH']['USD']['LOWDAY']
-    pre = str(data['RAW']['ETH']['USD']['CHANGEPCT24HOUR'])[0:5] + '%'
-    res = [data['RAW']['ETH']['USD']['PRICE'], emoji(pre)]
-    return res
+async def crypto() -> str:
+    """
+    Get parse info about favorite indexes.
+    :return:
+    Index with % changes and emoji status.
+    """
+    tasks = [
+        get_price_and_change('BTC'),
+        get_price_and_change('ETH'),
+        get_price_and_change('LTC'),
+        get_price_and_change('XRP'),
+        get_price_and_change('BNB'),
+        get_price_and_change('DOGE')
+    ]
 
+    prices = await asyncio.gather(*tasks)
+    symbols = ['BTC', 'ETH', 'LTC', 'XRP', 'BNB', 'DOGE']
 
-def ltc():
-    url = requests.get(f'https://min-api.cryptocompare.com/data/pricemultifull?fsyms=LTC&tsyms=USD')
-    data = url.json()
-    # high = data['RAW']['LTC']['USD']['HIGHDAY']
-    # low = data['RAW']['LTC']['USD']['LOWDAY']
-    pre = str(data['RAW']['LTC']['USD']['CHANGEPCT24HOUR'])[0:5] + '%'
-    res = [data['RAW']['LTC']['USD']['PRICE'], emoji(pre)]
-    return res
+    result = ""
+    for symbol, price in zip(symbols, prices):
+        if price[0] is not None:
+            result += f'<b>{symbol}:</b>\n<code>{price[0]}$</code>\n<code>{price[1]}</code>\n\n'
+        else:
+            result += f'<b>{symbol}:</b>\n<code>Error fetching data</code>\n\n'
 
-
-def doge():
-    url = requests.get(f'https://min-api.cryptocompare.com/data/pricemultifull?fsyms=DOGE&tsyms=USD')
-    data = url.json()
-    pre = str(data['RAW']['DOGE']['USD']['CHANGEPCT24HOUR'])[0:5] + '%'
-    res = [data['RAW']['DOGE']['USD']['PRICE'], emoji(pre)]
-    return res
-
-
-def xrp():
-    url = requests.get(f'https://min-api.cryptocompare.com/data/pricemultifull?fsyms=XRP&tsyms=USD')
-    data = url.json()
-    pre = str(data['RAW']['XRP']['USD']['CHANGEPCT24HOUR'])[0:5] + '%'
-    res = [data['RAW']['XRP']['USD']['PRICE'], emoji(pre)]
-    return res
-
-
-def bnb():
-    url = requests.get(f'https://min-api.cryptocompare.com/data/pricemultifull?fsyms=BNB&tsyms=USD')
-    data = url.json()
-    pre = str(data['RAW']['BNB']['USD']['CHANGEPCT24HOUR'])[0:5] + '%'
-    res = [data['RAW']['BNB']['USD']['PRICE'], emoji(pre)]
-    return res
-
-
-def crypto():
-    price_btc = btc()
-    price_eth = eth()
-    price_ltc = ltc()
-    price_xrp = xrp()
-    price_bnb = bnb()
-    price_doge = doge()
-    result = (f'<b>BTC:</b>\n<code>{price_btc[0]}$</code>\n<code>{price_btc[1]}</code>\n\n'
-              f'<b>ETH:</b>\n<code>{price_eth[0]}$</code>\n<code>{price_eth[1]}</code>\n\n'
-              f'<b>LTC:</b>\n<code>{price_ltc[0]}$</code>\n<code>{price_ltc[1]}</code>\n\n'
-              f'<b>XRP:</b>\n<code>{price_xrp[0]}$</code>\n<code>{price_xrp[1]}</code>\n\n'
-              f'<b>DOGE:</b>\n<code>{price_doge[0]}$</code>\n<code>{price_doge[1]}</code>\n\n'
-              f'<b>BNB:</b>\n<code>{price_bnb[0]}$</code>\n<code>{price_bnb[1]}</code>')
     return result
+
+
+async def index_price(index):
+    if len(index) == 0:
+        return "🐒 Щоб отримати ціну на конретний індекс, мабуть треба його хочаб вказати)) 0 IQ"
+    elif len(index) > 7:
+        return f"🦧 Більше 7 букв. Не читатиму."
+    else:
+        index_info = await get_price_and_change(index)
+
+        if index_info is None:
+            return f"🦉 Вибач, або був вказаний некоректний індекс, або я не можу отримати інформацію про <b>{index}</b>."
+        else:
+            price = f"""<b>{index}:</b>\n<code>{index_info[0]}$</code>\n<code>{index_info[1]}</code>"""
+            return price

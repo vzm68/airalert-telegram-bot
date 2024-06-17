@@ -2,8 +2,12 @@ from aiogram import Dispatcher, Bot
 from aiogram.types import Message, InputFile, ChatActions
 from tgbot.handlers.daily import get_weather_data, get_daily_news
 from tgbot.functions.cctv import capture_rtsp_screenshot
-from tgbot.functions.crypto import crypto
+from tgbot.functions.crypto import crypto, index_price
 from tgbot.functions.tuya_devices import tuya_sensors_info
+
+import logging
+
+logger = logging.getLogger(__name__)
 
 import time
 from random import randint
@@ -26,8 +30,10 @@ async def get_yard_img(message: Message):
         img = InputFile("yard.png")
         await message.answer_chat_action(action=ChatActions.UPLOAD_PHOTO)
         await message.reply_photo(photo=img)
+        logger.info(f"Cam1 info was sent to {message.from_user.full_name}/{message.from_user.id}")
     except Exception as err:
         await message.answer(text=str(err))
+        logger.error(f"Problem with send RTSP capture: {err}")
 
 
 async def get_weather(message: Message):
@@ -112,11 +118,21 @@ async def ask_gpt(message: Message):
 
 
 async def get_crypto_price(message: Message):
-    await message.answer(text=crypto())
+    price = await crypto()
+    await message.answer(text=price)
+    logger.info(f"Crypto price was sent to {message.from_user.full_name}/{message.from_user.id}")
+
+
+async def get_index_price(message: Message):
+    index = message.get_args().upper()
+    price = await index_price(index)
+    await message.reply(price)
+    logger.info(f"{index} price was sent to {message.from_user.full_name}/{message.from_user.id}")
 
 
 async def get_tuya_sensors_info(message: Message):
     await message.answer(text=tuya_sensors_info())
+    logger.info(f"Tuya sensors info was sent to {message.from_user.full_name}/{message.from_user.id}")
 
 
 def register_user(dp: Dispatcher):
@@ -128,4 +144,5 @@ def register_user(dp: Dispatcher):
     dp.register_message_handler(ask_gpt, commands=["ask"])
     dp.register_message_handler(clear_answers, commands=["clear"])
     dp.register_message_handler(get_crypto_price, commands=["price"])
+    dp.register_message_handler(get_index_price, commands=["index"])
     dp.register_message_handler(get_tuya_sensors_info, commands=["sensors"])

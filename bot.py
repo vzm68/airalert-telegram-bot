@@ -14,6 +14,7 @@ from tgbot.handlers.alert import register_alert
 
 from tgbot.middlewares.environment import EnvironmentMiddleware
 from tgbot.middlewares.scheduler import SchedulerMiddleware
+from tgbot.middlewares.throttling import ThrottlingMiddleware
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
@@ -26,6 +27,7 @@ logger = logging.getLogger(__name__)
 def register_all_middlewares(dp, config, scheduler):
     dp.setup_middleware(EnvironmentMiddleware(config=config))
     dp.setup_middleware(SchedulerMiddleware(scheduler))
+    dp.setup_middleware(ThrottlingMiddleware(limit=5))
 
 
 def register_all_filters(dp):
@@ -39,9 +41,9 @@ def register_all_handlers(dp):
 
 
 def set_scheduled_jobs(scheduler, bot):
-    scheduler.add_job(alert_check, "interval", seconds=15, args=(bot, ))
-    scheduler.add_job(ping, "interval", minutes=5, args=(bot, ))
-    scheduler.add_job(daily_news, "interval", hours=6, args=(bot, ))
+    scheduler.add_job(alert_check, "interval", seconds=15, args=(bot,))
+    scheduler.add_job(ping, "interval", minutes=5, args=(bot,))
+    scheduler.add_job(daily_news, "interval", hours=6, args=(bot,))
     scheduler.add_job(daily_tuya, "cron", hour=7, minute=0, second=0, args=(bot,))
     scheduler.add_job(daily_weather, "cron", hour=8, minute=0, second=0, args=(bot,))
     scheduler.add_job(daily_statistic, "cron", hour=9, minute=0, second=0, args=(bot,))
@@ -52,7 +54,7 @@ async def main():
     logging.basicConfig(
         level=logging.INFO,
         format=u'%(filename)s:%(lineno)d #%(levelname)-8s [%(asctime)s] - %(name)s - %(message)s',
-    )
+        encoding='utf-8')
     logger.info("Starting bot")
     config = load_config(".env")
 
@@ -82,4 +84,4 @@ if __name__ == '__main__':
     try:
         asyncio.run(main())
     except (KeyboardInterrupt, SystemExit):
-        logger.error("Bot stopped!")
+        logger.warning("Bot stopped!")
