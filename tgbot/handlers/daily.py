@@ -106,7 +106,8 @@ async def daily_news(bot: Bot):
 async def daily_crypto(bot: Bot):
     for chat in chats_id:
         try:
-            await bot.send_message(chat_id=chat, text=crypto())
+            price = await crypto()
+            await bot.send_message(chat_id=chat, text=price)
         except Exception as err:
             await bot.send_message(chat_id=chat, text=f"<code>{err}</code>")
 
