@@ -73,6 +73,7 @@ async def main():
     try:
         await bot_notification(bot)
         scheduler.start()
+        await bot.get_updates(offset=-1)
         await dp.start_polling()
     finally:
         await dp.storage.close()
