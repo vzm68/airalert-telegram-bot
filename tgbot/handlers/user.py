@@ -165,7 +165,7 @@ async def get_martingale(message: Message):
         try:
             balance = float(args[0])
             bet = float(args[1])
-            if balance <= 100000000 and bet <= 100000000:
+            if balance <= 100000000 and 1 <= bet:
                 await message.reply(martingale(balance, bet))
             else:
                 xd = round(uniform(50, 6000), 2)
