@@ -11,10 +11,7 @@ api_alert = load_config(".env").tg_bot.api_alert  # Get API alert from .env
 chats_id = load_config(".env").tg_bot.chats
 admins = load_config(".env").tg_bot.admin_ids
 
-link_state = "https://alerts.com.ua/api/states/25"  # I choose a specific region in my case
-history_link = "https://alerts.com.ua/api/history"  # History of alerts
-map_link = "https://alerts.com.ua/map.png"  # Map content
-head = {'X-API-Key': api_alert}  # Header to request
+link_state = f"https://api.alerts.in.ua/v1/iot/active_air_raid_alerts/31.json?token={api_alert}"
 
 
 def stop_alert(date):
@@ -44,15 +41,15 @@ async def alert_check(bot: Bot):
     global flag  # Not a good idea to use global var, but it's solution in my case. Func must be changed to class (!)
     global time
     try:
-        status = requests.get(link_state, headers=head).json()['state']['alert']  # Get True/False
-        if status is True and flag is False:
+        status = requests.get(link_state).json()  # A means Alert N means clear and P particular alert
+        if status == "A" and flag is False:
             time = datetime.now().strftime('%Y-%m-%d %H:%M')  # Save fixed time data to our global var
             flag = True
             for chat in chats_id:
                 await bot.send_message(chat_id=chat,
                                        text='🚨 Увага!\n\n'
                                             'Повітряна тривога у м. Київ!')
-        elif flag is True and status is False:
+        elif flag is True and status == "N":
             flag = False
             for chat in chats_id:
                 await bot.send_message(chat_id=chat, text=f'{stop_alert(time)}')
@@ -62,17 +59,10 @@ async def alert_check(bot: Bot):
 
 
 async def get_map(message: Message):
-    await message.reply_photo(requests.get(map_link).content)
-
-
-async def get_history(message: Message):
-    """
-    Temporary don't use. This for future
-    :param message:
-    :return:
-    """
-    history = requests.get(history_link, headers=head).text
-    await message.reply(text=history)
+    await message.reply(
+        text='Мапа тривог тимчасово доступна за <a href="https://alerts.in.ua/lite">посиланням</a>.',
+        disable_web_page_preview=False
+    )
 
 
 async def ping(bot: Bot):
