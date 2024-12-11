@@ -12,7 +12,6 @@ chats_id = load_config(".env").tg_bot.chats
 admins = load_config(".env").tg_bot.admin_ids
 
 link_state = f"https://api.alerts.in.ua/v1/iot/active_air_raid_alerts/31.json?token={api_alert}"
-map_link = "https://alerts.com.ua/map.png"  # Map content
 
 
 def stop_alert(date):
