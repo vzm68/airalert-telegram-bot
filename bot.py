@@ -19,7 +19,7 @@ from tgbot.middlewares.throttling import ThrottlingMiddleware
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from tgbot.handlers.alert import alert_check, ping
-from tgbot.handlers.daily import daily_weather, daily_statistic, daily_news, daily_crypto, daily_tuya
+from tgbot.handlers.daily import daily_weather, daily_statistic, daily_news, daily_crypto, daily_tuya, weekly_donat
 
 logger = logging.getLogger(__name__)
 
@@ -48,6 +48,7 @@ def set_scheduled_jobs(scheduler, bot):
     scheduler.add_job(daily_weather, "cron", hour=8, minute=0, second=0, args=(bot,))
     scheduler.add_job(daily_statistic, "cron", hour=9, minute=0, second=0, args=(bot,))
     scheduler.add_job(daily_crypto, "cron", hour=10, minute=0, second=0, args=(bot,))
+    scheduler.add_job(weekly_donat, "cron", day_of_week="fri", hour=15, minute=0, second=0, args=(bot,))
 
 
 async def main():
